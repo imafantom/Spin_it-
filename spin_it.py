@@ -121,15 +121,18 @@ st.markdown(
     """
     <style>
     .banner {
-        background-color: #6c63ff;
+        background: linear-gradient(90deg, #6a11cb, #2575fc); /* Purple to blue gradient */
         color: white;
-        padding: 10px;
+        padding: 20px;
         text-align: center;
-        font-size: 24px;
-        border-radius: 5px;
+        font-size: 28px;
+        font-weight: bold;
+        border-radius: 10px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+        margin-bottom: 20px;
     }
     </style>
-    <div class="banner">🎡 Spin It! Vocabulary Game 🎡</div>
+    <div class="banner">🎡 Welcome to Spin It! Vocabulary Game 🎡</div>
     """,
     unsafe_allow_html=True,
 )
