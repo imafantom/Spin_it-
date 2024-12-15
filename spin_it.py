@@ -100,37 +100,21 @@ trivia_list = [
 "Trivia: The phrase 'bite the bullet' comes from historical battlefield surgeries, where patients bit on a bullet to endure pain.",
 ]
 
-# State Initialization
-if "player_name" not in st.session_state:
-    st.session_state["player_name"] = None
-if "progress" not in st.session_state:
-    st.session_state["progress"] = 0
-if "seen_words" not in st.session_state:
-    st.session_state["seen_words"] = []
-if "quiz_pending" not in st.session_state:
-    st.session_state["quiz_pending"] = False
-if "quiz_word" not in st.session_state:
-    st.session_state["quiz_word"] = None
-if "quiz_options" not in st.session_state:
-    st.session_state["quiz_options"] = []
-if "selected_option" not in st.session_state:
-    st.session_state["selected_option"] = None
+# Initialize State Variables
+state_defaults = {
+    "player_name": None,
+    "progress": 0,
+    "seen_words": [],
+    "quiz_pending": False,
+    "quiz_word": None,
+    "quiz_options": [],
+    "selected_option": None,
+    "badge": None,
+}
 
-# Display badges based on progress
-    badges = [
-        {"threshold": 10, "label": "🏅 Rookie"},
-        {"threshold": 30, "label": "🥈 Amateur"},
-        {"threshold": 40, "label": "🥉 Semi-Pro"},
-        {"threshold": 80, "label": "🥇 Pro"},
-        {"threshold": 100, "label": "💻 Hacker"},
-        {"threshold": 150, "label": "🏆 Legend"},
-    ]
-    for badge in badges:
-        if st.session_state["progress"] >= badge["threshold"]:
-            st.session_state["badge"] = badge["label"]
-    if st.session_state["badge"]:
-        st.write(f"Badge Earned: {st.session_state['badge']}")
-
+for key, default in state_defaults.items():
+    if key not in st.session_state:
+        st.session_state[key] = default
 
 # Custom Banner
 st.markdown(
@@ -160,6 +144,21 @@ if st.session_state["player_name"] is None:
 else:
     st.title(f"Welcome, {st.session_state['player_name']}!")
     st.subheader(f"Words mastered: {st.session_state['progress']}")
+
+    # Display Badges
+    badges = [
+        {"threshold": 10, "label": "🏅 Rookie"},
+        {"threshold": 30, "label": "🥈 Amateur"},
+        {"threshold": 40, "label": "🥉 Semi-Pro"},
+        {"threshold": 80, "label": "🥇 Pro"},
+        {"threshold": 100, "label": "💻 Hacker"},
+        {"threshold": 150, "label": "🏆 Legend"},
+    ]
+    for badge in badges:
+        if st.session_state["progress"] >= badge["threshold"]:
+            st.session_state["badge"] = badge["label"]
+    if st.session_state["badge"]:
+        st.write(f"Badge Earned: {st.session_state['badge']}")
 
     # Word Spin Button
     if not st.session_state["quiz_pending"] and st.button("Spin it!"):
