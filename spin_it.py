@@ -100,56 +100,71 @@ trivia_list = [
 "Trivia: The phrase 'bite the bullet' comes from historical battlefield surgeries, where patients bit on a bullet to endure pain.",
 ]
 
-# Player stats
+# Player Stats
 if "player_name" not in st.session_state:
     st.session_state["player_name"] = None
 if "progress" not in st.session_state:
     st.session_state["progress"] = 0
 if "badge" not in st.session_state:
     st.session_state["badge"] = None
+if "seen_words" not in st.session_state:
+    st.session_state["seen_words"] = []
 
-# Main game logic
+# Game Setup
 if st.session_state["player_name"] is None:
     st.title("Spin It! Vocabulary Game")
-    st.subheader("Enter your name to start the game:")
+    st.image("https://via.placeholder.com/800x150.png?text=Spin+It!+Game", use_column_width=True)
     name = st.text_input("Your Name")
     if st.button("Let’s have some fun!") and name:
         st.session_state["player_name"] = name
         st.session_state["progress"] = 0
         st.session_state["badge"] = None
+        st.session_state["seen_words"] = []
 else:
     st.title(f"Welcome, {st.session_state['player_name']}! Spin It!")
+    st.image("https://via.placeholder.com/800x150.png?text=Vocabulary+Journey", use_column_width=True)
     st.subheader(f"Your Progress: {st.session_state['progress']} words mastered")
-    
-    # Display badges based on progress
-    badges = [
-        {"threshold": 10, "label": "🏅 Rookie"},
-        {"threshold": 30, "label": "🥈 Amateur"},
-        {"threshold": 40, "label": "🥉 Semi-Pro"},
-        {"threshold": 80, "label": "🥇 Pro"},
-        {"threshold": 100, "label": "💻 Hacker"},
-        {"threshold": 150, "label": "🏆 Legend"},
-    ]
-    for badge in badges:
-        if st.session_state["progress"] >= badge["threshold"]:
-            st.session_state["badge"] = badge["label"]
-    if st.session_state["badge"]:
-        st.write(f"Badge Earned: {st.session_state['badge']}")
 
-    # Button to spin the word
+    # Spin Word
     if st.button("Spin it!"):
         choice = random.choice(vocabulary)
+        if choice not in st.session_state["seen_words"]:
+            st.session_state["seen_words"].append(choice)
         st.session_state["progress"] += 1
+
         st.subheader(f"{choice['word_en']} / {choice['word_pl']}")
         st.write(choice["sentence"])
 
-        # Display trivia every 7 words
-        if st.session_state["progress"] % 7 == 0:
+        # Show trivia every 5 words
+        if st.session_state["progress"] % 5 == 0:
             trivia = random.choice(trivia_list)
-            st.markdown(f"**Trivia:** {trivia}")
-    
-    # Reset option
+            st.markdown(f"**Fun Fact:** {trivia}")
+
+        # Trigger quiz after 10 words
+        if st.session_state["progress"] % 10 == 0:
+            st.write("Time for a quiz!")
+            word = random.choice(st.session_state["seen_words"])
+            options = random.sample(
+                [word["word_pl"] for word in st.session_state["seen_words"]], 3
+            )
+            correct_answer = word["word_pl"]
+            if correct_answer not in options:
+                options[random.randint(0, 2)] = correct_answer
+            st.radio(
+                f"What is the translation of '{word['word_en']}'?",
+                options,
+                key="quiz_options",
+            )
+            if st.button("Submit Answer"):
+                selected = st.session_state.get("quiz_options", "")
+                if selected == correct_answer:
+                    st.success("Correct!")
+                else:
+                    st.error(f"Wrong! The correct answer is: {correct_answer}")
+
+    # Reset Option
     if st.button("Reset Game"):
         st.session_state["player_name"] = None
         st.session_state["progress"] = 0
         st.session_state["badge"] = None
+        st.session_state["seen_words"] = []
