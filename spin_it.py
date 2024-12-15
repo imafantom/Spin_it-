@@ -1,6 +1,5 @@
 import streamlit as st
 import random
-import time 
 
 # Extended Vocabulary List
 vocabulary = [
@@ -114,8 +113,6 @@ if "quiz_word" not in st.session_state:
     st.session_state["quiz_word"] = None
 if "quiz_options" not in st.session_state:
     st.session_state["quiz_options"] = []
-if "timer_start" not in st.session_state:
-    st.session_state["timer_start"] = None
 if "selected_option" not in st.session_state:
     st.session_state["selected_option"] = None
 
@@ -173,26 +170,17 @@ else:
             st.session_state["quiz_options"] = random.sample(options, k=min(len(options), 3))
             if correct_answer not in st.session_state["quiz_options"]:
                 st.session_state["quiz_options"][random.randint(0, len(st.session_state["quiz_options"]) - 1)] = correct_answer
-            st.session_state["timer_start"] = time.time()
 
     # Quiz Section
     if st.session_state["quiz_pending"]:
-        st.write("It's quiz time! You have 10 seconds to answer.")
+        st.write("It's quiz time!")
         st.write(f"**What is the translation of '{st.session_state['quiz_word']['word_en']}'?**")
 
         selected = st.radio(
             "Choose an option:", st.session_state["quiz_options"], key="selected_option"
         )
 
-        # Timer Logic
-        elapsed_time = time.time() - st.session_state["timer_start"]
-        remaining_time = max(10 - int(elapsed_time), 0)
-        st.progress(remaining_time / 10)
-
-        if remaining_time == 0:
-            st.error(f"Time's up! The correct answer was: {st.session_state['quiz_word']['word_pl']}")
-            st.session_state["quiz_pending"] = False
-        elif st.button("Submit Answer"):
+        if st.button("Submit Answer"):
             if selected == st.session_state["quiz_word"]["word_pl"]:
                 st.success("Correct!")
             else:
