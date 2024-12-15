@@ -116,6 +116,22 @@ if "quiz_options" not in st.session_state:
 if "selected_option" not in st.session_state:
     st.session_state["selected_option"] = None
 
+# Display badges based on progress
+    badges = [
+        {"threshold": 10, "label": "🏅 Rookie"},
+        {"threshold": 30, "label": "🥈 Amateur"},
+        {"threshold": 40, "label": "🥉 Semi-Pro"},
+        {"threshold": 80, "label": "🥇 Pro"},
+        {"threshold": 100, "label": "💻 Hacker"},
+        {"threshold": 150, "label": "🏆 Legend"},
+    ]
+    for badge in badges:
+        if st.session_state["progress"] >= badge["threshold"]:
+            st.session_state["badge"] = badge["label"]
+    if st.session_state["badge"]:
+        st.write(f"Badge Earned: {st.session_state['badge']}")
+
+
 # Custom Banner
 st.markdown(
     """
