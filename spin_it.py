@@ -109,9 +109,11 @@ if "seen_words" not in st.session_state:
     st.session_state["seen_words"] = []
 if "quiz_pending" not in st.session_state:
     st.session_state["quiz_pending"] = False
+if "timer_start" not in st.session_state:
+    st.session_state["timer_start"] = None
 
 # Visual Enhancements
-st.image("https://via.placeholder.com/800x150.png?text=Spin+It!+Game", use_column_width=True)
+st.image("https://via.placeholder.com/800x150.png?text=Spin+It!+Game", use_container_width=True)
 
 # Player Name Input
 if st.session_state["player_name"] is None:
@@ -143,10 +145,11 @@ else:
         # Trigger Quiz Every 10 Words
         if st.session_state["progress"] % 10 == 0:
             st.session_state["quiz_pending"] = True
+            st.session_state["timer_start"] = time.time()
 
     # Quiz Section
     if st.session_state["quiz_pending"]:
-        st.write("It's quiz time!")
+        st.write("It's quiz time! You have 10 seconds to answer.")
         quiz_word = random.choice(st.session_state["seen_words"])
         options = [word["word_pl"] for word in st.session_state["seen_words"]]
         correct_answer = quiz_word["word_pl"]
@@ -154,8 +157,16 @@ else:
         if correct_answer not in options:
             options[random.randint(0, len(options) - 1)] = correct_answer
 
-        selected = st.radio(f"What is the translation of '{quiz_word['word_en']}'?", options)
-        if st.button("Submit Answer"):
+        selected = st.radio(f"What is the translation of '{quiz_word['word_en']}'?", options, key="quiz_selection")
+        
+        # Timer Logic
+        elapsed_time = time.time() - st.session_state["timer_start"]
+        remaining_time = max(10 - int(elapsed_time), 0)
+        st.write(f"Time left: {remaining_time} seconds")
+        if remaining_time == 0:
+            st.error("Time's up! The correct answer was: " + correct_answer)
+            st.session_state["quiz_pending"] = False
+        elif st.button("Submit Answer"):
             if selected == correct_answer:
                 st.success("Correct!")
             else:
@@ -168,3 +179,4 @@ else:
         st.session_state["progress"] = 0
         st.session_state["seen_words"] = []
         st.session_state["quiz_pending"] = False
+        st.session_state["timer_start"] = None
