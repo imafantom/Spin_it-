@@ -13,7 +13,7 @@ vocabulary = [
     {"word_en": "independence", "word_pl": "niepodległość", "sentence": "The country celebrates its independence day in July."},
     {"word_en": "short-sighted", "word_pl": "krótkowzroczny", "sentence": "He is very short-sighted when it comes to investments."},
     {"word_en": "look forward to", "word_pl": "nie móc się doczekać", "sentence": "I look forward to meeting you next week."},
-    # Add more words from your list here
+    # Add more words here as needed
 ]
 
 # English grammar trivia
@@ -27,14 +27,14 @@ trivia_list = [
 
 # Player stats
 if "player_name" not in st.session_state:
-    st.session_state["player_name"] = ""
+    st.session_state["player_name"] = None
 if "progress" not in st.session_state:
     st.session_state["progress"] = 0
 if "badge" not in st.session_state:
     st.session_state["badge"] = None
 
-# Display name input
-if st.session_state["player_name"] == "":
+# Main game logic
+if st.session_state["player_name"] is None:
     st.title("Spin It! Vocabulary Game")
     st.subheader("Enter your name to start the game:")
     name = st.text_input("Your Name")
@@ -42,12 +42,11 @@ if st.session_state["player_name"] == "":
         st.session_state["player_name"] = name
         st.session_state["progress"] = 0
         st.session_state["badge"] = None
-        st.experimental_rerun()
 else:
     st.title(f"Welcome, {st.session_state['player_name']}! Spin It!")
     st.subheader(f"Your Progress: {st.session_state['progress']} words mastered")
     
-    # Show badges
+    # Display badges based on progress
     badges = [
         {"threshold": 10, "label": "🏅 Rookie"},
         {"threshold": 30, "label": "🥈 Amateur"},
@@ -62,23 +61,20 @@ else:
     if st.session_state["badge"]:
         st.write(f"Badge Earned: {st.session_state['badge']}")
 
-    # Game button
+    # Button to spin the word
     if st.button("Spin it!"):
         choice = random.choice(vocabulary)
         st.session_state["progress"] += 1
-
-        # Display random word and sentence
         st.subheader(f"{choice['word_en']} / {choice['word_pl']}")
         st.write(choice["sentence"])
 
-        # Show trivia every 7 words
+        # Display trivia every 7 words
         if st.session_state["progress"] % 7 == 0:
             trivia = random.choice(trivia_list)
             st.markdown(f"**Trivia:** {trivia}")
     
     # Reset option
     if st.button("Reset Game"):
-        st.session_state["player_name"] = ""
+        st.session_state["player_name"] = None
         st.session_state["progress"] = 0
         st.session_state["badge"] = None
-        st.experimental_rerun()
