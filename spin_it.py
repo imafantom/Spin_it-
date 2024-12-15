@@ -100,71 +100,71 @@ trivia_list = [
 "Trivia: The phrase 'bite the bullet' comes from historical battlefield surgeries, where patients bit on a bullet to endure pain.",
 ]
 
-# Player Stats
+# State Initialization
 if "player_name" not in st.session_state:
     st.session_state["player_name"] = None
 if "progress" not in st.session_state:
     st.session_state["progress"] = 0
-if "badge" not in st.session_state:
-    st.session_state["badge"] = None
 if "seen_words" not in st.session_state:
     st.session_state["seen_words"] = []
+if "quiz_pending" not in st.session_state:
+    st.session_state["quiz_pending"] = False
 
-# Game Setup
+# Visual Enhancements
+st.image("https://via.placeholder.com/800x150.png?text=Spin+It!+Game", use_column_width=True)
+
+# Player Name Input
 if st.session_state["player_name"] is None:
-    st.title("Spin It! Vocabulary Game")
-    st.image("https://via.placeholder.com/800x150.png?text=Spin+It!+Game", use_column_width=True)
-    name = st.text_input("Your Name")
-    if st.button("Let’s have some fun!") and name:
-        st.session_state["player_name"] = name
-        st.session_state["progress"] = 0
-        st.session_state["badge"] = None
-        st.session_state["seen_words"] = []
+    st.title("Welcome to Spin It!")
+    name = st.text_input("Enter your name to begin:")
+    if st.button("Start Game"):
+        if name.strip():
+            st.session_state["player_name"] = name
 else:
-    st.title(f"Welcome, {st.session_state['player_name']}! Spin It!")
-    st.image("https://via.placeholder.com/800x150.png?text=Vocabulary+Journey", use_column_width=True)
-    st.subheader(f"Your Progress: {st.session_state['progress']} words mastered")
+    st.title(f"Welcome, {st.session_state['player_name']}!")
+    st.subheader(f"Words mastered: {st.session_state['progress']}")
 
-    # Spin Word
-    if st.button("Spin it!"):
+    # Word Spin Button
+    if not st.session_state["quiz_pending"] and st.button("Spin it!"):
+        # Select a random word
         choice = random.choice(vocabulary)
         if choice not in st.session_state["seen_words"]:
             st.session_state["seen_words"].append(choice)
         st.session_state["progress"] += 1
 
+        # Display Word and Sentence
         st.subheader(f"{choice['word_en']} / {choice['word_pl']}")
         st.write(choice["sentence"])
 
-        # Show trivia every 5 words
+        # Show Trivia Every 5 Words
         if st.session_state["progress"] % 5 == 0:
-            trivia = random.choice(trivia_list)
-            st.markdown(f"**Fun Fact:** {trivia}")
+            st.info(random.choice(trivia_list))
 
-        # Trigger quiz after 10 words
+        # Trigger Quiz Every 10 Words
         if st.session_state["progress"] % 10 == 0:
-            st.write("Time for a quiz!")
-            word = random.choice(st.session_state["seen_words"])
-            options = random.sample(
-                [word["word_pl"] for word in st.session_state["seen_words"]], 3
-            )
-            correct_answer = word["word_pl"]
-            if correct_answer not in options:
-                options[random.randint(0, 2)] = correct_answer
-            st.radio(
-                f"What is the translation of '{word['word_en']}'?",
-                options,
-                key="quiz_options",
-            )
-            if st.button("Submit Answer"):
-                selected = st.session_state.get("quiz_options", "")
-                if selected == correct_answer:
-                    st.success("Correct!")
-                else:
-                    st.error(f"Wrong! The correct answer is: {correct_answer}")
+            st.session_state["quiz_pending"] = True
 
-    # Reset Option
+    # Quiz Section
+    if st.session_state["quiz_pending"]:
+        st.write("It's quiz time!")
+        quiz_word = random.choice(st.session_state["seen_words"])
+        options = [word["word_pl"] for word in st.session_state["seen_words"]]
+        correct_answer = quiz_word["word_pl"]
+        options = random.sample(options, k=min(len(options), 3))
+        if correct_answer not in options:
+            options[random.randint(0, len(options) - 1)] = correct_answer
+
+        selected = st.radio(f"What is the translation of '{quiz_word['word_en']}'?", options)
+        if st.button("Submit Answer"):
+            if selected == correct_answer:
+                st.success("Correct!")
+            else:
+                st.error(f"Incorrect! The correct answer is: {correct_answer}")
+            st.session_state["quiz_pending"] = False
+
+    # Reset Button
     if st.button("Reset Game"):
         st.session_state["player_name"] = None
         st.session_state["progress"] = 0
-        st.session_state["badge"] = None
         st.session_state["seen_words"] = []
+        st.session_state["quiz_pending"] = False
