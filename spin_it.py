@@ -1,4 +1,4 @@
-import tkinter as tk
+import streamlit as st
 import random
 
 # Sample data
@@ -10,27 +10,14 @@ vocabulary = [
     {"word_en": "house", "word_pl": "dom", "sentence": "They live in a beautiful house."}
 ]
 
-# Function to select a random word
-def spin_word():
-    choice = random.choice(vocabulary)
-    word_label.config(text=f"{choice['word_en']} / {choice['word_pl']}")
-    sentence_label.config(text=choice['sentence'])
+# Title of the app
+st.title("Spin It! English-Polish Vocabulary Game")
 
-# Create the main application window
-root = tk.Tk()
-root.title("Spin It! English-Polish Vocabulary Game")
-
-# Word display
-word_label = tk.Label(root, text="Spin to get a word!", font=("Helvetica", 16))
-word_label.pack(pady=20)
-
-# Sentence display
-sentence_label = tk.Label(root, text="", font=("Helvetica", 12), wraplength=400)
-sentence_label.pack(pady=20)
+# Instruction text
+st.write("Click the button to get a random English-Polish word pair and a sentence.")
 
 # Button to spin
-spin_button = tk.Button(root, text="Spin it!", font=("Helvetica", 14), command=spin_word)
-spin_button.pack(pady=20)
-
-# Run the application
-root.mainloop()
+if st.button("Spin it!"):
+    choice = random.choice(vocabulary)
+    st.subheader(f"{choice['word_en']} / {choice['word_pl']}")
+    st.write(choice["sentence"])
