@@ -110,11 +110,32 @@ if "seen_words" not in st.session_state:
     st.session_state["seen_words"] = []
 if "quiz_pending" not in st.session_state:
     st.session_state["quiz_pending"] = False
+if "quiz_word" not in st.session_state:
+    st.session_state["quiz_word"] = None
+if "quiz_options" not in st.session_state:
+    st.session_state["quiz_options"] = []
 if "timer_start" not in st.session_state:
     st.session_state["timer_start"] = None
+if "selected_option" not in st.session_state:
+    st.session_state["selected_option"] = None
 
-# Visual Enhancements
-st.image("https://via.placeholder.com/800x150.png?text=Spin+It!+Game", use_container_width=True)
+# Custom Banner
+st.markdown(
+    """
+    <style>
+    .banner {
+        background-color: #6c63ff;
+        color: white;
+        padding: 10px;
+        text-align: center;
+        font-size: 24px;
+        border-radius: 5px;
+    }
+    </style>
+    <div class="banner">🎡 Spin It! Vocabulary Game 🎡</div>
+    """,
+    unsafe_allow_html=True,
+)
 
 # Player Name Input
 if st.session_state["player_name"] is None:
@@ -146,38 +167,38 @@ else:
         # Trigger Quiz Every 10 Words
         if st.session_state["progress"] % 10 == 0:
             st.session_state["quiz_pending"] = True
+            st.session_state["quiz_word"] = random.choice(st.session_state["seen_words"])
+            options = [word["word_pl"] for word in st.session_state["seen_words"]]
+            correct_answer = st.session_state["quiz_word"]["word_pl"]
+            st.session_state["quiz_options"] = random.sample(options, k=min(len(options), 3))
+            if correct_answer not in st.session_state["quiz_options"]:
+                st.session_state["quiz_options"][random.randint(0, len(st.session_state["quiz_options"]) - 1)] = correct_answer
             st.session_state["timer_start"] = time.time()
 
     # Quiz Section
     if st.session_state["quiz_pending"]:
         st.write("It's quiz time! You have 10 seconds to answer.")
-        quiz_word = random.choice(st.session_state["seen_words"])
-        options = [word["word_pl"] for word in st.session_state["seen_words"]]
-        correct_answer = quiz_word["word_pl"]
-        options = random.sample(options, k=min(len(options), 3))
-        if correct_answer not in options:
-            options[random.randint(0, len(options) - 1)] = correct_answer
+        st.write(f"**What is the translation of '{st.session_state['quiz_word']['word_en']}'?**")
 
-        selected = st.radio(f"What is the translation of '{quiz_word['word_en']}'?", options, key="quiz_selection")
-        
+        selected = st.radio(
+            "Choose an option:", st.session_state["quiz_options"], key="selected_option"
+        )
+
         # Timer Logic
         elapsed_time = time.time() - st.session_state["timer_start"]
         remaining_time = max(10 - int(elapsed_time), 0)
-        st.write(f"Time left: {remaining_time} seconds")
+        st.progress(remaining_time / 10)
+
         if remaining_time == 0:
-            st.error("Time's up! The correct answer was: " + correct_answer)
+            st.error(f"Time's up! The correct answer was: {st.session_state['quiz_word']['word_pl']}")
             st.session_state["quiz_pending"] = False
         elif st.button("Submit Answer"):
-            if selected == correct_answer:
+            if selected == st.session_state["quiz_word"]["word_pl"]:
                 st.success("Correct!")
             else:
-                st.error(f"Incorrect! The correct answer is: {correct_answer}")
+                st.error(f"Incorrect! The correct answer is: {st.session_state['quiz_word']['word_pl']}")
             st.session_state["quiz_pending"] = False
 
     # Reset Button
     if st.button("Reset Game"):
-        st.session_state["player_name"] = None
-        st.session_state["progress"] = 0
-        st.session_state["seen_words"] = []
-        st.session_state["quiz_pending"] = False
-        st.session_state["timer_start"] = None
+        st.session_state.clear()
